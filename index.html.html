@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pronombres en Acción 🚂</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple:    #6C5CE7;
+    --purple-lt: #EEE9FF;
+    --purple-dk: #4A3DB5;
+    --teal:      #00B894;
+    --teal-lt:   #D9F5EE;
+    --coral:     #E17055;
+    --coral-lt:  #FCEAE5;
+    --amber:     #FDCB6E;
+    --amber-dk:  #B8860B;
+    --sky:       #74B9FF;
+    --sky-lt:    #E8F4FF;
+    --green:     #55EFC4;
+    --red-lt:    #FFE0DC;
+    --red:       #D63031;
+    --bg:        #F7F5FF;
+    --white:     #FFFFFF;
+    --text:      #2D2D44;
+    --muted:     #8884A8;
+    --radius:    20px;
+    --radius-sm: 12px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── HOME ── */
+  #home {
+    background: linear-gradient(160deg, #6C5CE7 0%, #a29bfe 100%);
+    align-items: center; justify-content: center;
+    text-align: center; padding: 2rem 1.5rem;
+    gap: 1.5rem;
+  }
+  .train-anim {
+    font-size: 72px;
+    animation: chug 1.5s ease-in-out infinite alternate;
+    display: block;
+  }
+  @keyframes chug { from { transform: translateX(-6px); } to { transform: translateX(6px); } }
+
+  #home h1 {
+    font-size: 2rem; font-weight: 900; color: #fff;
+    line-height: 1.2;
+  }
+  #home p { font-size: 1.05rem; color: rgba(255,255,255,0.85); }
+
+  .menu-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.9rem; width: 100%; max-width: 380px;
+  }
+  .menu-card {
+    background: rgba(255,255,255,0.18);
+    border: 2px solid rgba(255,255,255,0.35);
+    border-radius: var(--radius);
+    padding: 1.1rem 0.75rem;
+    cursor: pointer; text-align: center;
+    transition: transform 0.15s, background 0.15s;
+    color: white;
+  }
+  .menu-card:hover, .menu-card:active { transform: scale(1.04); background: rgba(255,255,255,0.28); }
+  .menu-card .icon { font-size: 2.2rem; display: block; margin-bottom: 0.4rem; }
+  .menu-card .card-title { font-size: 0.9rem; font-weight: 700; }
+  .menu-card .card-sub { font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
+  .menu-card.locked { opacity: 0.45; cursor: default; }
+  .menu-card.locked:hover { transform: none; background: rgba(255,255,255,0.18); }
+
+  /* ── GAME SCREEN ── */
+  #game {
+    background: var(--bg);
+    padding: 1rem 1.25rem 2rem;
+    gap: 1rem;
+  }
+
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 0;
+  }
+  .back-btn {
+    background: var(--white); border: none; border-radius: 50%;
+    width: 40px; height: 40px; font-size: 1.1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: transform 0.12s;
+  }
+  .back-btn:active { transform: scale(0.92); }
+
+  .module-tag {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+    padding: 4px 12px; border-radius: 99px;
+    background: var(--purple-lt); color: var(--purple-dk);
+    text-transform: uppercase;
+  }
+
+  .score-pill {
+    background: var(--amber); color: var(--amber-dk);
+    font-size: 0.85rem; font-weight: 700;
+    padding: 4px 12px; border-radius: 99px;
+  }
+
+  /* progress bar */
+  .progress-wrap {
+    background: rgba(108,92,231,0.12);
+    border-radius: 99px; height: 8px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; border-radius: 99px;
+    background: var(--purple);
+    transition: width 0.4s ease;
+  }
+
+  /* scene card */
+  .scene-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(108,92,231,0.10);
+    min-height: 200px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0.75rem;
+    position: relative;
+  }
+
+  .scene-bg {
+    position: absolute; inset: 0; border-radius: var(--radius);
+    opacity: 0.07; font-size: 7rem;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; user-select: none;
+  }
+
+  .avatars {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.75rem;
+  }
+  .avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    font-size: 2.5rem;
+    display: flex; align-items: center; justify-content: center;
+    border: 3px solid transparent;
+    transition: transform 0.2s;
+  }
+  .avatar.speaking {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 4px var(--purple-lt);
+    animation: pulse-av 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse-av {
+    0%, 100% { box-shadow: 0 0 0 4px var(--purple-lt); }
+    50% { box-shadow: 0 0 0 8px var(--purple-lt); }
+  }
+  .arrow { font-size: 1.5rem; color: var(--muted); }
+
+  .scene-narration {
+    font-size: 1rem; color: var(--muted);
+    font-style: italic; line-height: 1.4;
+  }
+  .scene-narration em {
+    color: var(--purple); font-style: normal; font-weight: 700;
+  }
+  .scene-question {
+    font-size: 1.15rem; font-weight: 700; color: var(--text);
+    line-height: 1.4;
+  }
+
+  /* options */
+  .options-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+  .opt {
+    background: var(--white);
+    border: 2.5px solid rgba(108,92,231,0.2);
+    border-radius: var(--radius-sm);
+    padding: 1rem 0.5rem;
+    font-size: 1.2rem; font-weight: 800;
+    cursor: pointer; text-align: center;
+    transition: transform 0.12s, border-color 0.15s, background 0.15s;
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .opt:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--purple); }
+  .opt:active:not(:disabled) { transform: scale(0.96); }
+  .opt:disabled { cursor: default; }
+  .opt.correct { background: var(--teal-lt); border-color: var(--teal); color: #007A60; }
+  .opt.wrong   { background: var(--red-lt);  border-color: var(--red);  color: var(--red); }
+  .opt.reveal  { background: var(--teal-lt); border-color: var(--teal); color: #007A60; }
+
+  /* feedback */
+  .feedback {
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1.1rem;
+    font-size: 1rem; font-weight: 700;
+    text-align: center;
+    display: none;
+    animation: popIn 0.25s ease;
+  }
+  @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .feedback.show { display: block; }
+  .feedback.good { background: var(--teal-lt); color: #007A60; }
+  .feedback.bad  { background: var(--red-lt);  color: var(--red); }
+
+  /* next btn */
+  .next-btn {
+    background: var(--purple);
+    color: white;
+    border: none; border-radius: var(--radius-sm);
+    padding: 1rem; font-size: 1.05rem; font-weight: 800;
+    cursor: pointer; width: 100%;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.35);
+    transition: transform 0.12s, background 0.15s;
+    display: none;
+  }
+  .next-btn:hover { background: var(--purple-dk); }
+  .next-btn:active { transform: scale(0.97); }
+
+  /* ── RESULTS SCREEN ── */
+  #results {
+    background: var(--bg);
+    align-items: center; justify-content: center;
+    text-align: center; padding: 2rem 1.5rem; gap: 1.2rem;
+  }
+  .result-icon { font-size: 5rem; animation: bounce 0.6s ease; }
+  @keyframes bounce {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  #results h2 { font-size: 1.8rem; font-weight: 900; color: var(--purple); }
+  #results p { font-size: 1rem; color: var(--muted); }
+  .result-score {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1.25rem 2rem;
+    font-size: 2.5rem; font-weight: 900;
+    color: var(--purple);
+    box-shadow: 0 4px 24px rgba(108,92,231,0.12);
+  }
+  .result-score span { font-size: 1rem; color: var(--muted); font-weight: 600; display: block; margin-top: 4px; }
+
+  .stars-row { display: flex; justify-content: center; gap: 0.5rem; font-size: 2.5rem; }
+
+  .result-btn {
+    background: var(--purple); color: white;
+    border: none; border-radius: var(--radius-sm);
+    padding: 1rem 2rem; font-size: 1rem; font-weight: 800;
+    cursor: pointer; width: 100%; max-width: 320px;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.35);
+    transition: background 0.15s;
+  }
+  .result-btn:hover { background: var(--purple-dk); }
+  .result-btn.secondary {
+    background: var(--white); color: var(--purple);
+    border: 2px solid var(--purple);
+    box-shadow: none; margin-top: -0.3rem;
+  }
+
+  /* ── STATS SCREEN ── */
+  #stats {
+    background: var(--bg);
+    padding: 1.5rem 1.25rem 2rem;
+    gap: 1rem;
+  }
+  #stats h2 { font-size: 1.4rem; font-weight: 900; color: var(--text); }
+
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .stat-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--bg);
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-pronoun {
+    font-size: 1rem; font-weight: 800; min-width: 90px; color: var(--text);
+  }
+  .stat-bar-bg {
+    flex: 1; height: 10px; background: var(--bg);
+    border-radius: 99px; overflow: hidden;
+  }
+  .stat-bar-fill {
+    height: 100%; border-radius: 99px;
+    background: var(--purple); transition: width 0.6s ease;
+  }
+  .stat-bar-fill.warm { background: var(--amber); }
+  .stat-bar-fill.low  { background: var(--coral); }
+  .stat-pct { font-size: 0.85rem; font-weight: 700; color: var(--muted); min-width: 36px; text-align: right; }
+
+  .tip-box {
+    background: var(--amber);
+    border-radius: var(--radius-sm);
+    padding: 0.9rem 1.1rem;
+    font-size: 0.95rem; font-weight: 700;
+    color: var(--amber-dk);
+  }
+
+  .home-from-stats {
+    background: var(--purple); color: white;
+    border: none; border-radius: var(--radius-sm);
+    padding: 1rem; font-size: 1rem; font-weight: 800;
+    cursor: pointer; width: 100%;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.25);
+  }
+
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="home" class="screen active">
+  <span class="train-anim">🚂</span>
+  <h1>Pronombres<br>en Acción</h1>
+  <p>¿Quién está hablando?</p>
+
+  <div class="menu-grid">
+    <div class="menu-card" onclick="startModule('identification')">
+      <span class="icon">👤</span>
+      <div class="card-title">¿Quién soy?</div>
+      <div class="card-sub">Yo · Tú</div>
+    </div>
+    <div class="menu-card" onclick="startModule('perspective')">
+      <span class="icon">👥</span>
+      <div class="card-title">Cambio de voz</div>
+      <div class="card-sub">Él · Ella</div>
+    </div>
+    <div class="menu-card" onclick="startModule('train')">
+      <span class="icon">🚇</span>
+      <div class="card-title">Historia del tren</div>
+      <div class="card-sub">Todos los pronombres</div>
+    </div>
+    <div class="menu-card" onclick="showStats()">
+      <span class="icon">⭐</span>
+      <div class="card-title">Mi progreso</div>
+      <div class="card-sub">Ver estadísticas</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ GAME ══════════ -->
+<div id="game" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span class="module-tag" id="module-label">Módulo</span>
+    <div class="score-pill">⭐ <span id="score-display">0</span></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+  </div>
+
+  <div class="scene-card" id="scene-card">
+    <div class="scene-bg" id="scene-bg"></div>
+    <div class="avatars" id="avatars"></div>
+    <p class="scene-narration" id="narration"></p>
+    <p class="scene-question" id="question"></p>
+  </div>
+
+  <div class="options-grid" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Siguiente →</button>
+</div>
+
+<!-- ══════════ RESULTS ══════════ -->
+<div id="results" class="screen">
+  <div class="result-icon" id="result-icon">🎉</div>
+  <h2 id="result-title">¡Muy bien!</h2>
+  <p id="result-msg">Completaste el módulo</p>
+  <div class="result-score">
+    <span id="final-score">0 / 0</span>
+    <span>respuestas correctas</span>
+  </div>
+  <div class="stars-row" id="stars-row"></div>
+  <button class="result-btn" id="replay-btn" onclick="replayModule()">Jugar de nuevo 🔄</button>
+  <button class="result-btn secondary" onclick="goHome()">Elegir otro módulo</button>
+</div>
+
+<!-- ══════════ STATS ══════════ -->
+<div id="stats" class="screen">
+  <div class="top-bar" style="padding-bottom:0">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span></span><span></span>
+  </div>
+  <h2>Mi progreso ⭐</h2>
+  <div class="stat-card" id="stat-rows"></div>
+  <div class="tip-box" id="tip-box"></div>
+  <button class="home-from-stats" onclick="goHome()">← Volver al inicio</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   QUESTION BANK
+═══════════════════════════════════════ */
+const MODULES = {
+  identification: {
+    label: '¿Quién soy?',
+    bg: '👤',
+    questions: [
+      {
+        avatars: [{ emoji:'🧒', label:'Lucas', speaking:true }],
+        narration: 'Lucas apunta hacia sí mismo.',
+        question: 'Lucas dice: "___ quiero jugar."',
+        options: ['Yo','Tú','Él'],
+        correct: 'Yo',
+        pronoun: 'Yo'
+      },
+      {
+        avatars: [{ emoji:'👩', label:'Mamá', speaking:true }],
+        narration: 'Mamá está hablando contigo.',
+        question: 'Mamá te dice: "___ te quiero mucho."',
+        options: ['Yo','Tú','Ella'],
+        correct: 'Yo',
+        pronoun: 'Yo'
+      },
+      {
+        avatars: [{ emoji:'👩', label:'Mamá', speaking:true }, { emoji:'🧒', label:'Lucas', speaking:false }],
+        narration: 'Mamá le habla directamente a Lucas.',
+        question: 'Mamá dice: "___ eres muy valiente."',
+        options: ['Yo','Tú','Él'],
+        correct: 'Tú',
+        pronoun: 'Tú'
+      },
+      {
+        avatars: [{ emoji:'🧒', label:'Lucas', speaking:true }, { emoji:'👩', label:'Mamá', speaking:false }],
+        narration: 'Lucas le habla a mamá.',
+        question: 'Lucas dice: "___ tienes hambre, ¿verdad?"',
+        options: ['Yo','Tú','Ella'],
+        correct: 'Tú',
+        pronoun: 'Tú'
+      },
+      {
+        avatars: [{ emoji:'👦', label:'Pedro', speaking:true }],
+        narration: 'Pedro apunta hacia sí mismo.',
+        question: 'Pedro dice: "___ tengo una pelota."',
+        options: ['Yo','Él','Tú'],
+        correct: 'Yo',
+        pronoun: 'Yo'
+      },
+      {
+        avatars: [{ emoji:'👩', label:'Profe', speaking:true }, { emoji:'🧒', label:'Lucas', speaking:false }],
+        narration: 'La profesora habla con Lucas.',
+        question: 'La profe dice: "___ eres muy inteligente."',
+        options: ['Tú','Yo','Él'],
+        correct: 'Tú',
+        pronoun: 'Tú'
+      },
+    ]
+  },
+
+  perspective: {
+    label: 'Cambio de voz',
+    bg: '🔄',
+    questions: [
+      {
+        avatars: [{ emoji:'🧒', label:'Lucas', speaking:true }, { emoji:'→', arrow:true }, { emoji:'👩', label:'Mamá', speaking:false }],
+        narration: 'Lucas dice: "Yo tengo un tren."',
+        question: 'Si mamá habla de Lucas, ¿qué dice?',
+        options: ['Yo','Tú','Él'],
+        correct: 'Él',
+        pronoun: 'Él'
+      },
+      {
+        avatars: [{ emoji:'👩', label:'Mamá', speaking:true }, { emoji:'→', arrow:true }, { emoji:'🧒', label:'Lucas', speaking:false }],
+        narration: 'Mamá dice: "Yo estoy cocinando."',
+        question: 'Si Lucas habla de mamá, ¿qué dice?',
+        options: ['Él','Ella','Yo'],
+        correct: 'Ella',
+        pronoun: 'Ella'
+      },
+      {
+        avatars: [{ emoji:'👦', label:'Amigo', speaking:true }, { emoji:'→', arrow:true }, { emoji:'🧒', label:'Lucas', speaking:false }],
+        narration: 'El amigo de Lucas dice: "Yo quiero jugar."',
+        question: 'Si Lucas habla de su amigo, ¿qué dice?',
+        options: ['Yo','Tú','Él'],
+        correct: 'Él',
+        pronoun: 'Él'
+      },
+      {
+        avatars: [{ emoji:'👧', label:'Ana', speaking:true }, { emoji:'→', arrow:true }, { emoji:'🧒', label:'Lucas', speaking:false }],
+        narration: 'Ana dice: "Yo tengo un perro."',
+        question: 'Si Lucas habla de Ana, ¿qué dice?',
+        options: ['Ella','Él','Yo'],
+        correct: 'Ella',
+        pronoun: 'Ella'
+      },
+      {
+        avatars: [{ emoji:'🧒', label:'Lucas', speaking:true }, { emoji:'→', arrow:true }, { emoji:'👨', label:'Papá', speaking:false }],
+        narration: 'Lucas dice: "Yo quiero helado."',
+        question: 'Si papá le dice a mamá que habla de Lucas, ¿qué dice?',
+        options: ['Él','Yo','Ella'],
+        correct: 'Él',
+        pronoun: 'Él'
+      },
+      {
+        avatars: [{ emoji:'👩‍🏫', label:'Profe', speaking:true }, { emoji:'→', arrow:true }, { emoji:'🧒', label:'Lucas', speaking:false }],
+        narration: 'La profesora dice: "Yo tengo mucha tarea."',
+        question: 'Si Lucas habla de la profesora, ¿qué dice?',
+        options: ['Él','Ella','Tú'],
+        correct: 'Ella',
+        pronoun: 'Ella'
+      },
+    ]
+  },
+
+  train: {
+    label: 'Historia del tren',
+    bg: '🚇',
+    questions: [
+      {
+        avatars: [{ emoji:'🚇', label:'', speaking:false }],
+        narration: 'Lucas está en el metro.',
+        question: 'Lucas dice: "___ voy en el metro."',
+        options: ['Yo','Él','Tú'],
+        correct: 'Yo',
+        pronoun: 'Yo'
+      },
+      {
+        avatars: [{ emoji:'🧒', label:'Lucas', speaking:false }, { emoji:'👩', label:'Mamá', speaking:true }],
+        narration: 'Mamá ve a Lucas y le habla a papá.',
+        question: 'Mamá dice: "___ está mirando el tren."',
+        options: ['Él','Ella','Yo'],
+        correct: 'Él',
+        pronoun: 'Él'
+      },
+      {
+        avatars: [{ emoji:'👨', label:'Papá', speaking:true }, { emoji:'🧒', label:'Lucas', speaking:false }],
+        narration: 'Papá le habla directamente a Lucas.',
+        question: 'Papá dice: "___ amas los trenes, ¿verdad?"',
+        options: ['Tú','Él','Yo'],
+        correct: 'Tú',
+        pronoun: 'Tú'
+      },
+      {
+        avatars: [{ emoji:'🧒', label:'Lucas', speaking:true }, { emoji:'👩', label:'Mamá', speaking:false }],
+        narration: 'Lucas habla con mamá en el metro.',
+        question: 'Lucas dice: "Mamá, ___ también tienes boleto."',
+        options: ['Yo','Tú','Ella'],
+        correct: 'Tú',
+        pronoun: 'Tú'
+      },
+      {
+        avatars: [{ emoji:'👩', label:'Mamá', speaking:true }],
+        narration: 'Mamá habla sola mirando el plano.',
+        question: 'Mamá dice: "___ me perdí un poco."',
+        options: ['Yo','Tú','Ella'],
+        correct: 'Yo',
+        pronoun: 'Yo'
+      },
+      {
+        avatars: [{ emoji:'🧒', label:'Lucas', speaking:true }, { emoji:'→', arrow:true }, { emoji:'👨', label:'Papá', speaking:false }],
+        narration: 'Lucas le cuenta a su amigo sobre papá.',
+        question: 'Lucas dice: "___ conoce todas las estaciones."',
+        options: ['Él','Yo','Tú'],
+        correct: 'Él',
+        pronoun: 'Él'
+      },
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let currentModule = null;
+let questions = [];
+let qIndex = 0;
+let sessionScore = 0;
+let answered = false;
+
+const stats = JSON.parse(localStorage.getItem('pronombres_stats') || '{}');
+// stats: { pronoun: { correct: N, total: N } }
+
+function saveStats() {
+  localStorage.setItem('pronombres_stats', JSON.stringify(stats));
+}
+
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() { showScreen('home'); }
+
+function showStats() {
+  renderStats();
+  showScreen('stats');
+}
+
+/* ═══════════════════════════════════════
+   MODULE START
+═══════════════════════════════════════ */
+function startModule(modKey) {
+  currentModule = modKey;
+  const mod = MODULES[modKey];
+  questions = shuffle([...mod.questions]);
+  qIndex = 0;
+  sessionScore = 0;
+  document.getElementById('module-label').textContent = mod.label;
+  showScreen('game');
+  renderQuestion();
+}
+
+function replayModule() { startModule(currentModule); }
+
+/* ═══════════════════════════════════════
+   QUESTION RENDER
+═══════════════════════════════════════ */
+function renderQuestion() {
+  answered = false;
+  const q = questions[qIndex];
+  const total = questions.length;
+
+  // progress
+  document.getElementById('progress-bar').style.width = (qIndex / total * 100) + '%';
+  document.getElementById('score-display').textContent = sessionScore;
+
+  // scene bg
+  document.getElementById('scene-bg').textContent = MODULES[currentModule].bg;
+
+  // avatars
+  const av = document.getElementById('avatars');
+  av.innerHTML = '';
+  q.avatars.forEach(a => {
+    if (a.arrow) {
+      const sp = document.createElement('span');
+      sp.className = 'arrow'; sp.textContent = '→';
+      av.appendChild(sp);
+    } else {
+      const div = document.createElement('div');
+      div.className = 'avatar' + (a.speaking ? ' speaking' : '');
+      div.style.background = avatarBg(a.emoji);
+      div.textContent = a.emoji;
+      if (a.label) div.title = a.label;
+      av.appendChild(div);
+    }
+  });
+
+  // text
+  document.getElementById('narration').innerHTML = q.narration.replace(/"([^"]+)"/g, '<em>"$1"</em>');
+  document.getElementById('question').textContent = q.question;
+
+  // options
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  const shuffledOpts = shuffle([...q.options]);
+  shuffledOpts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(btn, opt, q);
+    opts.appendChild(btn);
+  });
+
+  // feedback & next
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function avatarBg(emoji) {
+  const map = {'🧒':'#EEE9FF','👩':'#D9F5EE','👨':'#E8F4FF','👦':'#FFF3E0','👧':'#FFE8F0','👩‍🏫':'#FCEAE5','🚇':'#E8F4FF'};
+  return map[emoji] || '#F7F5FF';
+}
+
+/* ═══════════════════════════════════════
+   ANSWER LOGIC
+═══════════════════════════════════════ */
+function selectAnswer(btn, selected, q) {
+  if (answered) return;
+  answered = true;
+
+  const correct = selected === q.correct;
+  const allBtns = document.querySelectorAll('.opt');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.correct) b.classList.add(correct ? 'correct' : 'reveal');
+    else if (b === btn && !correct) b.classList.add('wrong');
+  });
+
+  // update stats
+  if (!stats[q.pronoun]) stats[q.pronoun] = { correct: 0, total: 0 };
+  stats[q.pronoun].total++;
+  if (correct) {
+    stats[q.pronoun].correct++;
+    sessionScore++;
+  }
+  saveStats();
+
+  const fb = document.getElementById('feedback');
+  fb.classList.add('show');
+  if (correct) {
+    fb.className = 'feedback show good';
+    const msgs = ['¡Muy bien! 🎉','¡Correcto! ⭐','¡Excelente! 🚂','¡Así se hace! 💪'];
+    fb.textContent = msgs[Math.floor(Math.random()*msgs.length)];
+  } else {
+    fb.className = 'feedback show bad';
+    fb.textContent = `La respuesta es "${q.correct}". ¡Sigue practicando!`;
+  }
+
+  document.getElementById('score-display').textContent = sessionScore;
+  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('next-btn').textContent = qIndex + 1 < questions.length ? 'Siguiente →' : 'Ver resultados 🏁';
+}
+
+/* ═══════════════════════════════════════
+   NEXT QUESTION / END
+═══════════════════════════════════════ */
+function nextQuestion() {
+  qIndex++;
+  if (qIndex >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  const total = questions.length;
+  document.getElementById('final-score').textContent = sessionScore + ' / ' + total;
+
+  const pct = sessionScore / total;
+  let icon, title, msg;
+  if (pct === 1)        { icon='🏆'; title='¡Perfecto!';      msg='¡Todas correctas! Eres un campeón 🚂'; }
+  else if (pct >= 0.75) { icon='🎉'; title='¡Muy bien!';      msg='¡Casi perfecto! Sigue practicando 💪'; }
+  else if (pct >= 0.5)  { icon='😊'; title='¡Buen intento!';  msg='Cada práctica te hace más fuerte ⭐'; }
+  else                  { icon='💪'; title='¡A practicar!';   msg='¡Inténtalo de nuevo, tú puedes! 🚂'; }
+
+  document.getElementById('result-icon').textContent = icon;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-msg').textContent = msg;
+
+  const stars = Math.round(pct * 3);
+  document.getElementById('stars-row').innerHTML =
+    Array.from({length:3}, (_,i) => `<span>${i < stars ? '⭐' : '☆'}</span>`).join('');
+
+  showScreen('results');
+  if (pct >= 0.75) launchConfetti();
+}
+
+/* ═══════════════════════════════════════
+   STATS
+═══════════════════════════════════════ */
+const PRONOUNS = ['Yo','Tú','Él','Ella','Nosotros'];
+
+function renderStats() {
+  const rows = document.getElementById('stat-rows');
+  rows.innerHTML = '';
+  let worstPronoun = null, worstPct = 1;
+
+  PRONOUNS.forEach(p => {
+    const d = stats[p] || { correct: 0, total: 0 };
+    const pct = d.total === 0 ? null : Math.round(d.correct / d.total * 100);
+
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+
+    const colorClass = pct === null ? '' : pct >= 75 ? '' : pct >= 50 ? 'warm' : 'low';
+    row.innerHTML = `
+      <span class="stat-pronoun">${p}</span>
+      <div class="stat-bar-bg">
+        <div class="stat-bar-fill ${colorClass}" style="width:${pct ?? 0}%"></div>
+      </div>
+      <span class="stat-pct">${pct !== null ? pct+'%' : '—'}</span>
+    `;
+    rows.appendChild(row);
+
+    if (pct !== null && pct < worstPct * 100) {
+      worstPct = pct / 100;
+      worstPronoun = p;
+    }
+  });
+
+  const tip = document.getElementById('tip-box');
+  if (worstPronoun && worstPct < 0.8) {
+    tip.textContent = `💡 Practica más el pronombre "${worstPronoun}" — ¡puedes mejorar!`;
+    tip.style.display = 'block';
+  } else if (Object.keys(stats).length === 0) {
+    tip.textContent = '🚂 ¡Completa un módulo para ver tu progreso!';
+    tip.style.display = 'block';
+  } else {
+    tip.textContent = '🌟 ¡Vas muy bien! Sigue practicando todos los días.';
+    tip.style.display = 'block';
+  }
+}
+
+/* ═══════════════════════════════════════
+   CONFETTI
+═══════════════════════════════════════ */
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const pieces = Array.from({length:80}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    w: 8 + Math.random()*8,
+    h: 4 + Math.random()*4,
+    color: ['#6C5CE7','#00B894','#FDCB6E','#E17055','#74B9FF'][Math.floor(Math.random()*5)],
+    angle: Math.random()*360,
+    spin: (Math.random()-0.5)*6,
+    vy: 2 + Math.random()*3,
+    vx: (Math.random()-0.5)*2,
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle * Math.PI/180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.angle += p.spin;
+    });
+    frame++;
+    if (frame < 120) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+
+/* ═══════════════════════════════════════
+   UTILS
+═══════════════════════════════════════ */
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
